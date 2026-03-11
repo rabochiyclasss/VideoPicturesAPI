@@ -1,10 +1,12 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile, Form, Depends
-
-from app.schemas import PostCreate, PostResponse
-from app.db import Base, Post, create_db_and_tables, get_async_session
-from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, File, UploadFile, Form, Depends
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db import Post, create_db_and_tables, get_async_session
+
+from app.images import imagekit
 
 
 @asynccontextmanager
@@ -30,7 +32,7 @@ async def upload_file(
 	await session.refresh(post)
 	return post
 
-@app.get("feed")
+@app.get("/feed")
 async def get_feed(
 		session: AsyncSession = Depends(get_async_session)
 ):
