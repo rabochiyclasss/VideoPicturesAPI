@@ -1,7 +1,5 @@
 from contextlib import asynccontextmanager
-from http.client import HTTPException
-
-from fastapi import FastAPI, File, UploadFile, Form, Depends
+from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,11 +38,11 @@ async def upload_file(
 			tags=["backend-upload"]
 		)
 
-		if upload_result.response.http_sstatus == 200:
+		if upload_result.response.http_status == 200:
 			post = Post(
 				caption=caption,
 				url=upload_result.url,
-				file_type="video" if file.filename.startswith("video/") else "image",
+				file_type="video" if file.content_type.startswith("video/") else "image",
 				file_name=upload_result.file_name
 			)
 			session.add(post)
@@ -57,7 +55,7 @@ async def upload_file(
 	finally:
 		if temp_file_path and os.path.exists(temp_file_path):
 			os.unlink(temp_file_path)
-			file.file.close()
+		file.file.close()
 
 @app.get("/feed")
 async def get_feed(
@@ -75,4 +73,4 @@ async def get_feed(
 			"file_type": post.file_type,
 			"created_at": post.created_at.isoformat()
 		})
-		return {"posts": posts_data}
+	return {"posts": posts_data}
